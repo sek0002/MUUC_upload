@@ -13,7 +13,6 @@
         {% if request.session.get("role") %}
         <header class="topbar">
             <a class="brand" href="{{ '/admin' if request.session.get('role') == 'admin' else '/dashboard' }}">
-                <img src="{{ url_for('static', path='/logo-circle.png') }}" alt="" class="brand-logo">
                 <span>MUUC Portal</span>
             </a>
             <div class="menu-wrap">

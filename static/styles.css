@@ -131,14 +131,6 @@ fieldset {
     letter-spacing: 0.03em;
 }
 
-.brand-logo {
-    width: 38px;
-    height: 38px;
-    flex: 0 0 auto;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
 .menu-wrap {
     position: relative;
 }
