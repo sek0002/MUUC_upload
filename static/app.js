@@ -1,6 +1,14 @@
 const menuWrap = document.querySelector(".menu-wrap");
 const menuButton = document.querySelector(".menu-button");
 
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/static/service-worker.js").then((registration) => {
+      registration.update();
+    }).catch(() => {});
+  });
+}
+
 if (menuWrap && menuButton) {
   menuButton.addEventListener("click", () => {
     const open = menuWrap.classList.toggle("open");

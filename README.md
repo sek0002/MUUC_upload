@@ -26,7 +26,11 @@ Create `.env` in the project root:
 ```bash
 FILE_STORAGE_ROOT=/absolute/path/for/muuc-data
 SESSION_SECRET=change-this-secret
+USER_PIN=change-this-upload-pin
 ADMIN_OTP_SECRET=BASE32SECRET
+LOGIN_RATE_LIMIT_ATTEMPTS=5
+LOGIN_RATE_LIMIT_WINDOW_SECONDS=600
+LOGIN_LOCKOUT_SECONDS=900
 ```
 
 This storage root will contain:
@@ -37,8 +41,14 @@ This storage root will contain:
 
 ## PINs
 
-- Upload login: `6882`
+- Upload login: configured with `USER_PIN` in `.env`
 - Admin login: 6-digit OTP from your authenticator app
+
+Login rate limiting defaults to 5 failed attempts in 10 minutes, followed by a 15-minute lockout. Override with:
+
+- `LOGIN_RATE_LIMIT_ATTEMPTS`
+- `LOGIN_RATE_LIMIT_WINDOW_SECONDS`
+- `LOGIN_LOCKOUT_SECONDS`
 
 Generate an admin OTP secret:
 

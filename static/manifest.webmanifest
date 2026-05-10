@@ -1,0 +1,25 @@
+{
+  "name": "MUUC Upload Portal",
+  "short_name": "MUUC Portal",
+  "description": "Receipt upload and review portal for MUUC claims.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0e1418",
+  "theme_color": "#0e1418",
+  "icons": [
+    {
+      "src": "/static/logo-circle.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/logo-circle.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

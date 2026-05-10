@@ -3,7 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0e1418">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="MUUC Portal">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>{% block title %}MUUC Upload Portal{% endblock %}</title>
+    <link rel="manifest" href="{{ url_for('static', path='/manifest.webmanifest') }}?v={{ asset_version() }}">
     <link rel="icon" type="image/png" href="{{ url_for('static', path='/logo-circle.png') }}">
     <link rel="apple-touch-icon" href="{{ url_for('static', path='/logo-circle.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', path='/styles.css') }}?v={{ asset_version() }}">

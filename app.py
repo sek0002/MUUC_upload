@@ -35,9 +35,13 @@ METADATA_XLSX_PATH = STORAGE_ROOT / "metadata" / "upload_metadata.xlsx"
 SUMMARY_XLSX_PATH = STORAGE_ROOT / "metadata" / "upload_summary.xlsx"
 ADMIN_SUMMARY_XLSX_PATH = STORAGE_ROOT / "metadata" / "admin_upload_summary.xlsx"
 
-USER_PIN = "6882"
+USER_PIN = os.environ.get("USER_PIN", "").strip()
 ADMIN_OTP_SECRET = os.environ.get("ADMIN_OTP_SECRET", "").replace(" ", "").upper()
 ALLOWED_EXTENSIONS = {".pdf", ".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp", ".tiff"}
+LOGIN_RATE_LIMIT_ATTEMPTS = int(os.environ.get("LOGIN_RATE_LIMIT_ATTEMPTS", "5"))
+LOGIN_RATE_LIMIT_WINDOW_SECONDS = int(os.environ.get("LOGIN_RATE_LIMIT_WINDOW_SECONDS", "600"))
+LOGIN_LOCKOUT_SECONDS = int(os.environ.get("LOGIN_LOCKOUT_SECONDS", "900"))
+login_attempts: dict[str, dict[str, Any]] = {}
 
 
 app = FastAPI(title="MUUC Upload Portal")
@@ -199,6 +203,44 @@ def verify_admin_otp(value: str) -> bool:
         hmac.compare_digest(submitted, generate_totp(ADMIN_OTP_SECRET, current_interval + drift))
         for drift in (-1, 0, 1)
     )
+
+
+def login_rate_limit_key(request: Request, role: str) -> str:
+    forwarded_for = request.headers.get("x-forwarded-for", "")
+    client_ip = forwarded_for.split(",", 1)[0].strip()
+    if not client_ip and request.client:
+        client_ip = request.client.host
+    return f"{role}:{client_ip or 'unknown'}"
+
+
+def check_login_rate_limit(request: Request, role: str) -> None:
+    key = login_rate_limit_key(request, role)
+    now = time.time()
+    attempt = login_attempts.get(key)
+    if not attempt:
+        return
+    locked_until = attempt.get("locked_until", 0)
+    if locked_until > now:
+        raise HTTPException(status_code=429, detail="Too many login attempts. Try again later.")
+    first_attempt = attempt.get("first_attempt", now)
+    if now - first_attempt > LOGIN_RATE_LIMIT_WINDOW_SECONDS:
+        login_attempts.pop(key, None)
+
+
+def record_login_failure(request: Request, role: str) -> None:
+    key = login_rate_limit_key(request, role)
+    now = time.time()
+    attempt = login_attempts.get(key)
+    if not attempt or now - attempt.get("first_attempt", now) > LOGIN_RATE_LIMIT_WINDOW_SECONDS:
+        attempt = {"count": 0, "first_attempt": now, "locked_until": 0}
+    attempt["count"] += 1
+    if attempt["count"] >= LOGIN_RATE_LIMIT_ATTEMPTS:
+        attempt["locked_until"] = now + LOGIN_LOCKOUT_SECONDS
+    login_attempts[key] = attempt
+
+
+def clear_login_failures(request: Request, role: str) -> None:
+    login_attempts.pop(login_rate_limit_key(request, role), None)
 
 
 def ensure_role(request: Request, role: str) -> None:
@@ -580,11 +622,18 @@ def landing_page(request: Request, message: str | None = None) -> HTMLResponse:
 @app.post("/login")
 def login(request: Request, portal_type: str = Form(...), pin: str = Form(...)) -> RedirectResponse:
     target_role = "admin" if portal_type == "admin" else "user"
+    check_login_rate_limit(request, target_role)
     if target_role == "admin":
         if not verify_admin_otp(pin):
+            record_login_failure(request, target_role)
             return RedirectResponse(url="/?message=Incorrect+admin+OTP", status_code=303)
-    elif pin != USER_PIN:
-        return RedirectResponse(url="/?message=Incorrect+PIN", status_code=303)
+    else:
+        if not USER_PIN:
+            raise HTTPException(status_code=500, detail="Upload PIN is not configured")
+        if not hmac.compare_digest(pin, USER_PIN):
+            record_login_failure(request, target_role)
+            return RedirectResponse(url="/?message=Incorrect+PIN", status_code=303)
+    clear_login_failures(request, target_role)
     request.session["role"] = target_role
     if target_role == "admin":
         return RedirectResponse(url="/admin", status_code=303)
