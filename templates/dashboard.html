@@ -5,7 +5,7 @@
 {% block content %}
 <section class="page-header">
     <div>
-        <p class="eyebrow">{{ "Admin Review" if admin else "Recent Uploads" }}</p>
+        <p class="eyebrow">{{ "Admin Review" if admin else "Recent Uploads - Allow 3-5 business days for secondary approval" }}</p>
     </div>
     <form method="get" action="{{ '/admin' if admin else '/dashboard' }}" class="sort-form filter-row">
         <label class="sr-only" for="sort_by">Sort by</label>
