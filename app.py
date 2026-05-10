@@ -44,6 +44,16 @@ app = FastAPI(title="MUUC Upload Portal")
 app.add_middleware(SessionMiddleware, secret_key=os.environ.get("SESSION_SECRET", "muuc-upload-portal-secret"))
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
+templates.env.globals["asset_version"] = lambda: int(time.time())
+
+
+@app.middleware("http")
+async def add_static_cache_headers(request: Request, call_next: Any) -> Response:
+    response = await call_next(request)
+    if request.url.path.startswith("/static/"):
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        response.headers["Pragma"] = "no-cache"
+    return response
 
 
 def parse_iso_datetime(value: str | None) -> datetime | None:

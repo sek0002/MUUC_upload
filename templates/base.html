@@ -6,7 +6,7 @@
     <title>{% block title %}MUUC Upload Portal{% endblock %}</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', path='/logo-circle.png') }}">
     <link rel="apple-touch-icon" href="{{ url_for('static', path='/logo-circle.png') }}">
-    <link rel="stylesheet" href="{{ url_for('static', path='/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='/styles.css') }}?v={{ asset_version() }}">
 </head>
 <body>
     <div class="site-shell">
@@ -45,6 +45,6 @@
             <div class="zoom-stage" data-zoom-stage></div>
         </div>
     </div>
-    <script src="{{ url_for('static', path='/app.js') }}"></script>
+    <script src="{{ url_for('static', path='/app.js') }}?v={{ asset_version() }}"></script>
 </body>
 </html>

@@ -335,7 +335,7 @@ fieldset {
     border-top: 1px solid var(--border);
     padding-top: 0.25rem;
     position: relative;
-    min-height: 3.35rem;
+    min-height: 4.35rem;
 }
 
 .upload-item:first-child {
@@ -345,11 +345,11 @@ fieldset {
 
 .upload-summary {
     list-style: none;
-    display: block;
+    display: flex;
     align-items: center;
     gap: 0.55rem;
     cursor: pointer;
-    min-height: 2.35rem;
+    min-height: 4.05rem;
     padding-right: 6.9rem;
     position: relative;
 }
@@ -360,6 +360,7 @@ fieldset {
 
 .upload-summary-text {
     min-width: 0;
+    width: 100%;
 }
 
 .admin-title-hover-trigger {
@@ -909,6 +910,7 @@ body.modal-open {
 
     .upload-summary {
         padding-right: 4.85rem;
+        min-height: 3.45rem;
     }
 
     .admin-date-group-card .upload-summary {
