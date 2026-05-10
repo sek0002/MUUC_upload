@@ -320,7 +320,7 @@ fieldset {
 }
 
 .date-group-label {
-    margin: 0 0 0.4rem;
+    margin: 0 0 0.25rem;
     font-size: 0.88rem;
     font-weight: 800;
     color: var(--accent-strong);
@@ -328,14 +328,14 @@ fieldset {
 
 .date-group-items {
     display: grid;
-    gap: 0.4rem;
+    gap: 0.25rem;
 }
 
 .upload-item {
     border-top: 1px solid var(--border);
-    padding-top: 0.4rem;
+    padding-top: 0.25rem;
     position: relative;
-    min-height: 4rem;
+    min-height: 3.35rem;
 }
 
 .upload-item:first-child {
@@ -349,8 +349,8 @@ fieldset {
     align-items: center;
     gap: 0.55rem;
     cursor: pointer;
-    min-height: 2.8rem;
-    padding-right: 8.1rem;
+    min-height: 2.35rem;
+    padding-right: 6.9rem;
     position: relative;
 }
 
@@ -370,14 +370,14 @@ fieldset {
 .upload-title {
     font-size: 0.96rem;
     font-weight: 800;
-    margin: 0 0 0.08rem;
+    margin: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
 .upload-subtitle {
-    margin: 0;
+    margin: -0.05rem 0 0;
     color: var(--muted);
     font-size: 0.85rem;
     overflow: hidden;
@@ -414,7 +414,7 @@ fieldset {
 }
 
 .admin-date-group-card .upload-summary {
-    padding-right: 12.4rem;
+    padding-right: 10.8rem;
 }
 
 .status-shortcuts {
@@ -453,9 +453,9 @@ fieldset {
 }
 
 .processed-badge {
-    min-width: 7.25rem;
+    min-width: 6.1rem;
     border-radius: 14px;
-    padding: 0.5rem 0.6rem;
+    padding: 0.42rem 0.5rem;
     text-align: center;
     font-weight: 800;
     border: 1px solid var(--border);
@@ -908,16 +908,16 @@ body.modal-open {
     }
 
     .upload-summary {
-        padding-right: 5.85rem;
+        padding-right: 4.85rem;
     }
 
     .admin-date-group-card .upload-summary {
-        padding-right: 9.6rem;
+        padding-right: 8.2rem;
     }
 
     .processed-badge {
-        min-width: 5.25rem;
-        padding: 0.4rem 0.45rem;
+        min-width: 4.45rem;
+        padding: 0.34rem 0.38rem;
         font-size: 0.72rem;
     }
 

@@ -240,17 +240,21 @@ if (receiptSections && receiptTemplate && receiptSections.children.length === 0)
 }
 
 if (dashboardSearchInput) {
-  let searchSubmitTimer = null;
-  dashboardSearchInput.addEventListener("input", () => {
-    clearTimeout(searchSubmitTimer);
-    searchSubmitTimer = setTimeout(() => {
-      if (dashboardSearchInput.form?.requestSubmit) {
-        dashboardSearchInput.form.requestSubmit();
-      } else {
-        dashboardSearchInput.form?.submit();
-      }
-    }, 450);
-  });
+  const applyDashboardSearch = () => {
+    const query = dashboardSearchInput.value.trim().toLowerCase();
+    document.querySelectorAll(".date-group-card").forEach((groupCard) => {
+      let hasVisibleItem = false;
+      groupCard.querySelectorAll(".upload-item").forEach((item) => {
+        const matches = !query || item.textContent.toLowerCase().includes(query);
+        item.hidden = !matches;
+        hasVisibleItem = hasVisibleItem || matches;
+      });
+      groupCard.hidden = !hasVisibleItem;
+    });
+  };
+
+  dashboardSearchInput.addEventListener("input", applyDashboardSearch);
+  applyDashboardSearch();
 }
 
 if (uploadForm) {
