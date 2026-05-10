@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Summary | MUUC Upload Portal{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <p class="eyebrow">Summary</p>
+    </div>
+    <a class="button-link secondary" href="/summary/download">Download Excel</a>
+</section>
+
+<section class="upload-card summary-card">
+    {% if rows %}
+    <div class="summary-table-wrap">
+        <table class="summary-table">
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th>Name</th>
+                    <th>Claim</th>
+                    <th>Uploaded</th>
+                    <th>Receipt Date</th>
+                    <th>Value</th>
+                    <th>Status</th>
+                    <th>Details</th>
+                </tr>
+                <tr class="summary-filter-row">
+                    <th><input type="text" class="summary-filter-input" data-summary-filter="0" placeholder="Filter file"></th>
+                    <th><input type="text" class="summary-filter-input" data-summary-filter="1" placeholder="Filter name"></th>
+                    <th><input type="text" class="summary-filter-input" data-summary-filter="2" placeholder="Filter claim"></th>
+                    <th><input type="text" class="summary-filter-input" data-summary-filter="3" placeholder="Filter uploaded"></th>
+                    <th><input type="text" class="summary-filter-input" data-summary-filter="4" placeholder="Filter receipt"></th>
+                    <th><input type="text" class="summary-filter-input" data-summary-filter="5" placeholder="Filter value"></th>
+                    <th><input type="text" class="summary-filter-input" data-summary-filter="6" placeholder="Filter status"></th>
+                    <th><input type="text" class="summary-filter-input" data-summary-filter="7" placeholder="Filter details"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in rows %}
+                <tr>
+                    <td>{{ row["original_filename"] }}</td>
+                    <td>{{ row["full_name"] }}</td>
+                    <td>{{ row["claim_details"] }}{% if row["misc_detail"] %} ({{ row["misc_detail"] }}){% endif %}</td>
+                    <td>{{ row["uploaded_at"] | display_datetime }}</td>
+                    <td>{{ row["receipt_date"] | display_date }}</td>
+                    <td>{{ row["value_to_claim"] or "-" }}</td>
+                    <td>{{ row["status"] | title }}</td>
+                    <td>{{ row["additional_details"] or "-" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <h2>No uploads yet</h2>
+        <p>The summary spreadsheet will populate after uploads are added.</p>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

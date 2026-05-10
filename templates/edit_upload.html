@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Upload | MUUC Upload Portal{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <p class="eyebrow">Admin Edit</p>
+        <h1>Edit upload metadata</h1>
+    </div>
+    <a class="button-link" href="/admin">Back to Admin</a>
+</section>
+
+{% set claims = upload["claim_details"].split(", ") %}
+<form action="/admin/upload/{{ upload['id'] }}/update" method="post" class="upload-form single-edit">
+    <section class="receipt-block">
+        <label>Date</label>
+        <input type="datetime-local" name="receipt_date" value="{{ upload['receipt_date'][:16] }}" required>
+
+        <label>Full Name</label>
+        <input type="text" name="full_name" value="{{ upload['full_name'] }}" required>
+
+        <fieldset class="claim-grid">
+            <legend>Claim details</legend>
+            <label><input type="checkbox" name="claim_details" value="Shore" {% if "Shore" in claims %}checked{% endif %}> Shore</label>
+            <label><input type="checkbox" name="claim_details" value="Boat" {% if "Boat" in claims %}checked{% endif %}> Boat</label>
+            <label><input type="checkbox" name="claim_details" value="Social" {% if "Social" in claims %}checked{% endif %}> Social</label>
+            <label><input type="checkbox" name="claim_details" value="Misc" {% if "Misc" in claims %}checked{% endif %}> Misc</label>
+            <input type="text" name="misc_detail" value="{{ upload['misc_detail'] or '' }}" placeholder="If Misc, type detail here">
+        </fieldset>
+
+        <label>Additional details</label>
+        <textarea name="additional_details" rows="4">{{ upload["additional_details"] or "" }}</textarea>
+
+        <div class="bank-grid">
+            <div>
+                <label>BSB</label>
+                <input type="text" name="bsb" value="{{ upload['bsb'] or '' }}">
+            </div>
+            <div>
+                <label>ACC</label>
+                <input type="text" name="acc" value="{{ upload['acc'] or '' }}">
+            </div>
+        </div>
+
+        <label>Value to claim</label>
+        <input type="number" name="value_to_claim" value="{{ upload['value_to_claim'] or '' }}" inputmode="decimal" step="0.01" min="0">
+
+        <label>Status</label>
+        <select name="status">
+            <option value="pending" {% if upload["status"] == "pending" %}selected{% endif %}>Pending</option>
+            <option value="processed" {% if upload["status"] == "processed" %}selected{% endif %}>Processed</option>
+            <option value="rejected" {% if upload["status"] == "rejected" %}selected{% endif %}>Rejected</option>
+        </select>
+    </section>
+
+    <div class="form-actions">
+        <button type="submit">Save Changes</button>
+    </div>
+</form>
+{% endblock %}

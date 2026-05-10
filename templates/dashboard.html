@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block title %}{{ "Admin" if admin else "Recent Uploads" }} | MUUC Upload Portal{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <p class="eyebrow">{{ "Admin Review" if admin else "Recent Uploads" }}</p>
+    </div>
+    <form method="get" action="{{ '/admin' if admin else '/dashboard' }}" class="sort-form filter-row">
+        <label class="sr-only" for="sort_by">Sort by</label>
+        <select id="sort_by" name="sort_by" onchange="this.form.submit()">
+            <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Newest</option>
+            <option value="oldest" {% if sort_by == 'oldest' %}selected{% endif %}>Oldest</option>
+            <option value="name" {% if sort_by == 'name' %}selected{% endif %}>Name</option>
+        </select>
+        <label class="sr-only" for="status_filter">Status filter</label>
+        <select id="status_filter" name="status_filter" onchange="this.form.submit()">
+            <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All</option>
+            <option value="processed" {% if status_filter == 'processed' %}selected{% endif %}>Processed</option>
+            <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+            <option value="rejected" {% if status_filter == 'rejected' %}selected{% endif %}>Rejected</option>
+        </select>
+    </form>
+</section>
+
+<section class="stack-list">
+    {% if grouped_uploads %}
+        {% for group in grouped_uploads %}
+        <article class="upload-card date-group-card {% if admin %}admin-date-group-card{% endif %}">
+            <p class="date-group-label">{{ group["date"] }}</p>
+            <div class="date-group-items">
+                {% for upload in group["items"] %}
+                <details class="upload-item">
+                    <summary class="upload-summary">
+                        <div class="upload-summary-text {% if admin %}admin-title-hover-trigger{% endif %}">
+                            <p class="upload-title">{{ upload["original_filename"] }}</p>
+                            <p class="upload-subtitle">{{ upload["full_name"] }}</p>
+                            {% if admin %}
+                            <div class="hover-preview summary-hover-preview">
+                                <p class="preview-label">Preview</p>
+                                {% if upload["mime_type"].startswith("image/") %}
+                                <img src="/preview/{{ upload['id'] }}" alt="Preview of {{ upload['original_filename'] }}">
+                                <button
+                                    type="button"
+                                    class="secondary zoom-trigger"
+                                    data-zoom-trigger
+                                    data-zoom-kind="image"
+                                    data-zoom-src="/preview/{{ upload['id'] }}"
+                                    data-zoom-label="{{ upload['original_filename'] }}"
+                                >
+                                    Zoom preview
+                                </button>
+                                {% elif upload["mime_type"] == "application/pdf" %}
+                                <iframe src="/preview/{{ upload['id'] }}#toolbar=0&navpanes=0&scrollbar=0" title="Preview of {{ upload['original_filename'] }}"></iframe>
+                                <button
+                                    type="button"
+                                    class="secondary zoom-trigger"
+                                    data-zoom-trigger
+                                    data-zoom-kind="pdf"
+                                    data-zoom-src="/preview/{{ upload['id'] }}#toolbar=0&navpanes=0&scrollbar=0"
+                                    data-zoom-label="{{ upload['original_filename'] }}"
+                                >
+                                    Zoom preview
+                                </button>
+                                {% else %}
+                                <p>Preview unavailable for this file type.</p>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="status-column">
+                            {% if admin and upload["status"] == "pending" %}
+                            <div class="status-shortcuts" aria-label="Quick status actions">
+                                <form action="/admin/upload/{{ upload['id'] }}/status" method="post">
+                                    <input type="hidden" name="status" value="processed">
+                                    <button type="submit" class="ghost shortcut-button processed" title="Mark Processed" aria-label="Mark Processed">✓</button>
+                                </form>
+                                <form action="/admin/upload/{{ upload['id'] }}/status" method="post">
+                                    <input type="hidden" name="status" value="rejected">
+                                    <button type="submit" class="ghost shortcut-button rejected" title="Mark Rejected" aria-label="Mark Rejected">✕</button>
+                                </form>
+                            </div>
+                            {% endif %}
+                            <div class="processed-badge {{ upload['status'] }}">
+                                {% if upload["status"] == "processed" %}
+                                <span class="tick">✓</span>
+                                <span>Processed</span>
+                                {% elif upload["status"] == "rejected" %}
+                                <span class="tick">✕</span>
+                                <span>Rejected</span>
+                                {% else %}
+                                <span class="tick">•</span>
+                                <span>Pending</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </summary>
+                    <div class="upload-details">
+                        <div class="upload-meta">
+                            <p><strong>Full Name:</strong> {{ upload["full_name"] }}</p>
+                            <p><strong>Claim details:</strong> {{ upload["claim_details"] }}{% if upload["misc_detail"] %} ({{ upload["misc_detail"] }}){% endif %}</p>
+                            <p><strong>Date uploaded:</strong> {{ upload["uploaded_at"] | display_datetime }}</p>
+                            <p><strong>Receipt date:</strong> {{ upload["receipt_date"] | display_date }}</p>
+                            {% if upload["value_to_claim"] %}
+                            <p><strong>Value to claim:</strong> {{ upload["value_to_claim"] }}</p>
+                            {% endif %}
+                            {% if upload["additional_details"] %}
+                            <p><strong>Additional details:</strong> {{ upload["additional_details"] }}</p>
+                            {% endif %}
+                            {% if admin and (upload["bsb"] or upload["acc"]) %}
+                            <p><strong>Bank details:</strong> BSB {{ upload["bsb"] or "-" }} / ACC {{ upload["acc"] or "-" }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="upload-detail-side">
+                            <a class="secondary-link" href="/files/{{ upload['id'] }}" target="_blank">View file</a>
+                            <div class="hover-preview inline-preview">
+                                <p class="preview-label">Preview</p>
+                                {% if upload["mime_type"].startswith("image/") %}
+                                <img src="/preview/{{ upload['id'] }}" alt="Preview of {{ upload['original_filename'] }}">
+                                <button
+                                    type="button"
+                                    class="secondary zoom-trigger"
+                                    data-zoom-trigger
+                                    data-zoom-kind="image"
+                                    data-zoom-src="/preview/{{ upload['id'] }}"
+                                    data-zoom-label="{{ upload['original_filename'] }}"
+                                >
+                                    Zoom preview
+                                </button>
+                                {% elif upload["mime_type"] == "application/pdf" %}
+                                <iframe src="/preview/{{ upload['id'] }}#toolbar=0&navpanes=0&scrollbar=0" title="Preview of {{ upload['original_filename'] }}"></iframe>
+                                <button
+                                    type="button"
+                                    class="secondary zoom-trigger"
+                                    data-zoom-trigger
+                                    data-zoom-kind="pdf"
+                                    data-zoom-src="/preview/{{ upload['id'] }}#toolbar=0&navpanes=0&scrollbar=0"
+                                    data-zoom-label="{{ upload['original_filename'] }}"
+                                >
+                                    Zoom preview
+                                </button>
+                                {% else %}
+                                <p>Preview unavailable for this file type.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% if admin %}
+                        <div class="admin-actions">
+                            <form action="/admin/upload/{{ upload['id'] }}/status" method="post">
+                                <input type="hidden" name="status" value="pending">
+                                <button type="submit">Mark Pending</button>
+                            </form>
+                            <form action="/admin/upload/{{ upload['id'] }}/status" method="post">
+                                <input type="hidden" name="status" value="processed">
+                                <button type="submit">Mark Processed</button>
+                            </form>
+                            <form action="/admin/upload/{{ upload['id'] }}/status" method="post">
+                                <input type="hidden" name="status" value="rejected">
+                                <button type="submit" class="danger">Mark Rejected</button>
+                            </form>
+                            <a class="button-link" href="/admin/upload/{{ upload['id'] }}/edit">Edit Metadata</a>
+                            <form action="/admin/upload/{{ upload['id'] }}/duplicate" method="post">
+                                <button type="submit">Duplicate</button>
+                            </form>
+                            <form action="/admin/upload/{{ upload['id'] }}/delete" method="post" onsubmit="return confirm('Delete this upload?');">
+                                <button type="submit" class="danger">Delete</button>
+                            </form>
+                        </div>
+                        {% endif %}
+                    </div>
+                </details>
+                {% endfor %}
+            </div>
+        </article>
+        {% endfor %}
+    {% else %}
+    <div class="empty-state">
+        <h2>No uploads yet</h2>
+        <p>Open the upload portal from the menu to add PDF or image receipts.</p>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MUUC Upload Portal{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/styles.css') }}">
+</head>
+<body>
+    <div class="site-shell">
+        {% if request.session.get("role") %}
+        <header class="topbar">
+            <a class="brand" href="{{ '/admin' if request.session.get('role') == 'admin' else '/dashboard' }}">MUUC Portal</a>
+            <div class="menu-wrap">
+                <button class="menu-button" type="button" aria-expanded="false">Menu</button>
+                <div class="menu-panel">
+                    <a href="{{ '/admin' if request.session.get('role') == 'admin' else '/dashboard' }}">Main Page</a>
+                    <a href="/upload">Upload Portal</a>
+                    <a href="/summary">Summary Page</a>
+                    <a href="/logout">Log Out</a>
+                </div>
+            </div>
+        </header>
+        {% endif %}
+        <main>
+            {% if message %}
+            <div class="flash">{{ message }}</div>
+            {% endif %}
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+    <div class="zoom-modal" id="zoom-modal" hidden>
+        <div class="zoom-modal-backdrop" data-zoom-close></div>
+        <div class="zoom-modal-panel">
+            <div class="zoom-toolbar">
+                <button type="button" class="secondary zoom-button" data-zoom-out>-</button>
+                <button type="button" class="secondary zoom-button" data-zoom-reset>100%</button>
+                <button type="button" class="secondary zoom-button" data-zoom-in>+</button>
+                <button type="button" class="ghost zoom-close" data-zoom-close>Close</button>
+            </div>
+            <div class="zoom-stage" data-zoom-stage></div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', path='/app.js') }}"></script>
+</body>
+</html>

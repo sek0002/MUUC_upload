@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome | MUUC Upload Portal{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-copy">
+        <p class="eyebrow">Receipt Upload Portal</p>
+        <div class="pin-panel">
+            <form action="/login" method="post" class="login-form">
+                <label for="portal_type">Portal</label>
+                <select id="portal_type" name="portal_type">
+                    <option value="user">Upload Login</option>
+                    <option value="admin">Admin Login</option>
+                </select>
+
+                <label for="pin">PIN</label>
+                <input id="pin" name="pin" type="password" inputmode="numeric" placeholder="Enter PIN" required>
+
+                <button type="submit">Enter Portal</button>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="460" viewBox="0 0 720 460" fill="none">
+  <rect width="720" height="460" rx="28" fill="#FFFDF8"/>
+  <rect x="30" y="24" width="660" height="412" rx="24" fill="#F4EFE6" stroke="#0C7C59" stroke-width="4"/>
+  <rect x="62" y="60" width="180" height="28" rx="14" fill="#0C7C59"/>
+  <text x="74" y="80" fill="white" font-family="Trebuchet MS, sans-serif" font-size="18" font-weight="700">Sample Image Receipt</text>
+  <text x="62" y="122" fill="#1F2A2C" font-family="Trebuchet MS, sans-serif" font-size="22" font-weight="700">Claim Metadata Preview</text>
+  <text x="62" y="164" fill="#6D716D" font-family="Trebuchet MS, sans-serif" font-size="18">Full Name: Alex Citizen</text>
+  <text x="62" y="196" fill="#6D716D" font-family="Trebuchet MS, sans-serif" font-size="18">Claim: Shore, Misc (Parking)</text>
+  <text x="62" y="228" fill="#6D716D" font-family="Trebuchet MS, sans-serif" font-size="18">Date: 2026-05-10 10:20</text>
+  <rect x="62" y="274" width="596" height="112" rx="18" fill="white" stroke="#E0B04B" stroke-width="3"/>
+  <text x="84" y="314" fill="#1F2A2C" font-family="Trebuchet MS, sans-serif" font-size="18" font-weight="700">Accepted file types</text>
+  <text x="84" y="346" fill="#6D716D" font-family="Trebuchet MS, sans-serif" font-size="18">PDF, PNG, JPG, JPEG, GIF, BMP, WEBP, TIFF</text>
+  <text x="84" y="374" fill="#6D716D" font-family="Trebuchet MS, sans-serif" font-size="18">Multiple files can be attached to one receipt entry.</text>
+</svg>
