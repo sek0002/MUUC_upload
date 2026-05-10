@@ -277,7 +277,8 @@ fieldset {
 }
 
 .filter-row {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(110px, max-content) minmax(110px, max-content) minmax(180px, 260px) max-content;
     gap: 0.45rem;
     align-items: center;
 }
@@ -293,7 +294,8 @@ fieldset {
 }
 
 .sort-form input[type="search"] {
-    min-width: min(260px, 42vw);
+    width: 100%;
+    min-width: 0;
     padding-right: 0.82rem;
 }
 
@@ -348,10 +350,13 @@ fieldset {
 .upload-summary {
     list-style: none;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) max-content;
+    grid-template-columns: minmax(0, 1fr);
     align-items: center;
     gap: 0.55rem;
     cursor: pointer;
+    min-height: 2.8rem;
+    padding-right: 8.25rem;
+    position: relative;
 }
 
 .upload-summary::-webkit-details-marker {
@@ -401,13 +406,20 @@ fieldset {
 }
 
 .status-column {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
     display: flex;
     flex-direction: row;
     gap: 0.35rem;
-    align-items: flex-end;
+    align-items: center;
     justify-content: flex-end;
     min-width: max-content;
-    justify-self: end;
+}
+
+.admin-date-group-card .upload-summary {
+    padding-right: 12.75rem;
 }
 
 .status-shortcuts {
@@ -446,7 +458,7 @@ fieldset {
 }
 
 .processed-badge {
-    min-width: 120px;
+    min-width: 7.25rem;
     border-radius: 14px;
     padding: 0.5rem 0.6rem;
     text-align: center;
@@ -870,24 +882,19 @@ body.modal-open {
         display: grid;
     }
 
-    .upload-summary {
-        grid-template-columns: minmax(0, 1fr) max-content;
-    }
-
-    .status-column {
-        justify-content: flex-end;
-        min-width: max-content;
-    }
-
     .filter-row {
-        flex-wrap: wrap;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     }
 
     .sort-form select,
     .sort-form input[type="search"],
     .search-button {
-        flex: 1 1 9.5rem;
+        width: 100%;
         min-width: 0;
+    }
+
+    .search-button {
+        padding-inline: 0.85rem;
     }
 
     .summary-hover-preview {
@@ -901,5 +908,30 @@ body.modal-open {
 
     .hover-preview iframe {
         min-height: 280px;
+    }
+}
+
+@media (max-width: 480px) {
+    .site-shell {
+        padding-inline: 0.6rem;
+    }
+
+    .upload-summary {
+        padding-right: 6.7rem;
+    }
+
+    .admin-date-group-card .upload-summary {
+        padding-right: 10.7rem;
+    }
+
+    .processed-badge {
+        min-width: 5.9rem;
+        padding: 0.45rem 0.5rem;
+        font-size: 0.78rem;
+    }
+
+    .shortcut-button {
+        width: 1.65rem;
+        height: 1.65rem;
     }
 }
