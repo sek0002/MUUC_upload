@@ -4,13 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}MUUC Upload Portal{% endblock %}</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', path='/logo-circle.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', path='/logo-circle.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', path='/styles.css') }}">
 </head>
 <body>
     <div class="site-shell">
         {% if request.session.get("role") %}
         <header class="topbar">
-            <a class="brand" href="{{ '/admin' if request.session.get('role') == 'admin' else '/dashboard' }}">MUUC Portal</a>
+            <a class="brand" href="{{ '/admin' if request.session.get('role') == 'admin' else '/dashboard' }}">
+                <img src="{{ url_for('static', path='/logo-circle.png') }}" alt="" class="brand-logo">
+                <span>MUUC Portal</span>
+            </a>
             <div class="menu-wrap">
                 <button class="menu-button" type="button" aria-expanded="false">Menu</button>
                 <div class="menu-panel">
