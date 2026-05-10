@@ -26,6 +26,7 @@ Create `.env` in the project root:
 ```bash
 FILE_STORAGE_ROOT=/absolute/path/for/muuc-data
 SESSION_SECRET=change-this-secret
+ADMIN_OTP_SECRET=BASE32SECRET
 ```
 
 This storage root will contain:
@@ -37,7 +38,19 @@ This storage root will contain:
 ## PINs
 
 - Upload login: `6882`
-- Admin login: `1991`
+- Admin login: 6-digit OTP from your authenticator app
+
+Generate an admin OTP secret:
+
+```bash
+python3 -c "import base64, secrets; print(base64.b32encode(secrets.token_bytes(20)).decode().rstrip('='))"
+```
+
+Add the generated value to `.env` as `ADMIN_OTP_SECRET`, then add this account to an authenticator app using a manual setup key:
+
+- Account name: `MUUC Upload Portal`
+- Key: the generated `ADMIN_OTP_SECRET`
+- Type: time based
 
 ## Deployment
 

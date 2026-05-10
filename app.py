@@ -1,9 +1,15 @@
 from __future__ import annotations
 
 import json
+import base64
+import binascii
+import hashlib
+import hmac
 import os
 import secrets
 import sqlite3
+import struct
+import time
 from contextlib import closing
 from datetime import datetime
 from pathlib import Path
@@ -29,7 +35,7 @@ METADATA_XLSX_PATH = STORAGE_ROOT / "metadata" / "upload_metadata.xlsx"
 SUMMARY_XLSX_PATH = STORAGE_ROOT / "metadata" / "upload_summary.xlsx"
 
 USER_PIN = "6882"
-ADMIN_PIN = "1991"
+ADMIN_OTP_SECRET = os.environ.get("ADMIN_OTP_SECRET", "").replace(" ", "").upper()
 ALLOWED_EXTENSIONS = {".pdf", ".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp", ".tiff"}
 
 
@@ -155,6 +161,33 @@ def normalize_status(value: str | None) -> str:
 
 def status_to_processed(status: str) -> int:
     return 1 if status == "processed" else 0
+
+
+def generate_totp(secret: str, interval: int | None = None) -> str:
+    if interval is None:
+        interval = int(time.time() // 30)
+    try:
+        padded_secret = secret + ("=" * ((8 - len(secret) % 8) % 8))
+        key = base64.b32decode(padded_secret, casefold=True)
+    except (binascii.Error, ValueError) as exc:
+        raise HTTPException(status_code=500, detail="Admin OTP secret is invalid") from exc
+    digest = hmac.new(key, struct.pack(">Q", interval), hashlib.sha1).digest()
+    offset = digest[-1] & 0x0F
+    code = struct.unpack(">I", digest[offset : offset + 4])[0] & 0x7FFFFFFF
+    return f"{code % 1_000_000:06d}"
+
+
+def verify_admin_otp(value: str) -> bool:
+    submitted = value.strip().replace(" ", "")
+    if not ADMIN_OTP_SECRET:
+        raise HTTPException(status_code=500, detail="Admin OTP is not configured")
+    if not submitted.isdigit() or len(submitted) != 6:
+        return False
+    current_interval = int(time.time() // 30)
+    return any(
+        hmac.compare_digest(submitted, generate_totp(ADMIN_OTP_SECRET, current_interval + drift))
+        for drift in (-1, 0, 1)
+    )
 
 
 def ensure_role(request: Request, role: str) -> None:
@@ -453,8 +486,10 @@ def landing_page(request: Request, message: str | None = None) -> HTMLResponse:
 @app.post("/login")
 def login(request: Request, portal_type: str = Form(...), pin: str = Form(...)) -> RedirectResponse:
     target_role = "admin" if portal_type == "admin" else "user"
-    required_pin = ADMIN_PIN if target_role == "admin" else USER_PIN
-    if pin != required_pin:
+    if target_role == "admin":
+        if not verify_admin_otp(pin):
+            return RedirectResponse(url="/?message=Incorrect+admin+OTP", status_code=303)
+    elif pin != USER_PIN:
         return RedirectResponse(url="/?message=Incorrect+PIN", status_code=303)
     request.session["role"] = target_role
     if target_role == "admin":
