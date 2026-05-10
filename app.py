@@ -226,17 +226,42 @@ def parse_receipts(payload: str | None) -> list[dict[str, Any]]:
     return data
 
 
-def fetch_uploads(sort_by: str = "newest", status_filter: str = "all", admin: bool = False) -> list[sqlite3.Row]:
+def fetch_uploads(
+    sort_by: str = "newest",
+    status_filter: str = "all",
+    admin: bool = False,
+    search: str = "",
+) -> list[sqlite3.Row]:
     order_by = {
         "newest": "uploaded_at DESC, id DESC",
         "oldest": "uploaded_at ASC, id ASC",
         "name": "full_name COLLATE NOCASE ASC, uploaded_at DESC",
     }.get(sort_by, "uploaded_at DESC, id DESC")
-    where_clause = ""
-    params: tuple[Any, ...] = ()
+    where_parts = []
+    params: list[Any] = []
     if status_filter in {"processed", "pending", "rejected"}:
-        where_clause = "WHERE status = ?"
-        params = (status_filter,)
+        where_parts.append("status = ?")
+        params.append(status_filter)
+    search_term = search.strip()
+    if search_term:
+        search_columns = [
+            "original_filename",
+            "full_name",
+            "receipt_date",
+            "claim_details",
+            "misc_detail",
+            "additional_details",
+            "value_to_claim",
+            "status",
+        ]
+        if admin:
+            search_columns.extend(["bsb", "acc"])
+        where_parts.append(
+            "(" + " OR ".join(f"{column} LIKE ?" for column in search_columns) + ")"
+        )
+        search_pattern = f"%{search_term}%"
+        params.extend([search_pattern] * len(search_columns))
+    where_clause = f"WHERE {' AND '.join(where_parts)}" if where_parts else ""
     select_columns = """
         id, created_at, uploaded_at, full_name, receipt_date, claim_details,
         misc_detail, additional_details, value_to_claim, status,
@@ -251,7 +276,7 @@ def fetch_uploads(sort_by: str = "newest", status_filter: str = "all", admin: bo
     with closing(get_db()) as connection:
         return connection.execute(
             f"SELECT {select_columns} FROM uploads {where_clause} ORDER BY {order_by}",
-            params,
+            tuple(params),
         ).fetchall()
 
 
@@ -511,9 +536,10 @@ def dashboard_context(
     admin: bool,
     sort_by: str,
     status_filter: str,
+    search: str,
     message: str | None = None,
 ) -> dict[str, Any]:
-    uploads = fetch_uploads(sort_by, status_filter, admin=admin)
+    uploads = fetch_uploads(sort_by, status_filter, admin=admin, search=search)
     grouped_uploads: list[dict[str, Any]] = []
     last_group_key: str | None = None
     for upload in uploads:
@@ -527,6 +553,7 @@ def dashboard_context(
         "admin": admin,
         "sort_by": sort_by,
         "status_filter": status_filter,
+        "search": search,
         "grouped_uploads": grouped_uploads,
         "message": message,
     }
@@ -565,12 +592,13 @@ def user_dashboard(
     request: Request,
     sort_by: str = "newest",
     status_filter: str = "all",
+    search: str = "",
     message: str | None = None,
 ) -> HTMLResponse:
     ensure_logged_in(request)
     return templates.TemplateResponse(
         "dashboard.html",
-        dashboard_context(request, False, sort_by, status_filter, message),
+        dashboard_context(request, False, sort_by, status_filter, search, message),
     )
 
 
@@ -646,12 +674,13 @@ def admin_dashboard(
     request: Request,
     sort_by: str = "newest",
     status_filter: str = "all",
+    search: str = "",
     message: str | None = None,
 ) -> HTMLResponse:
     ensure_role(request, "admin")
     return templates.TemplateResponse(
         "dashboard.html",
-        dashboard_context(request, True, sort_by, status_filter, message),
+        dashboard_context(request, True, sort_by, status_filter, search, message),
     )
 
 
