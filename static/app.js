@@ -20,6 +20,7 @@ const receiptSections = document.querySelector("#receipt-sections");
 const receiptTemplate = document.querySelector("#receipt-template");
 const addReceiptButton = document.querySelector("#add-receipt-button");
 const payloadInput = document.querySelector("#receipts_payload");
+const dashboardSearchInput = document.querySelector("[data-auto-submit-search]");
 const zoomModal = document.querySelector("#zoom-modal");
 const zoomStage = document.querySelector("[data-zoom-stage]");
 const zoomInButton = document.querySelector("[data-zoom-in]");
@@ -236,6 +237,20 @@ if (addReceiptButton) {
 
 if (receiptSections && receiptTemplate && receiptSections.children.length === 0) {
   addReceiptSection();
+}
+
+if (dashboardSearchInput) {
+  let searchSubmitTimer = null;
+  dashboardSearchInput.addEventListener("input", () => {
+    clearTimeout(searchSubmitTimer);
+    searchSubmitTimer = setTimeout(() => {
+      if (dashboardSearchInput.form?.requestSubmit) {
+        dashboardSearchInput.form.requestSubmit();
+      } else {
+        dashboardSearchInput.form?.submit();
+      }
+    }, 450);
+  });
 }
 
 if (uploadForm) {

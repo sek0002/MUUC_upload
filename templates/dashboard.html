@@ -22,8 +22,7 @@
             <option value="rejected" {% if status_filter == 'rejected' %}selected{% endif %}>Rejected</option>
         </select>
         <label class="sr-only" for="search">Search uploads</label>
-        <input id="search" name="search" type="search" value="{{ search }}" placeholder="Search uploads">
-        <button type="submit" class="secondary search-button">Search</button>
+        <input id="search" name="search" type="search" value="{{ search }}" placeholder="Search uploads" data-auto-submit-search>
     </form>
 </section>
 
