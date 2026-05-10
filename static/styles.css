@@ -403,8 +403,8 @@ fieldset {
 .status-column {
     position: absolute;
     right: 0;
-    top: 0.35rem;
-    transform: none;
+    top: 50%;
+    transform: translateY(-50%);
     display: flex;
     flex-direction: row;
     gap: 0.35rem;
