@@ -18,6 +18,10 @@
                 <tr>
                     <th>File</th>
                     <th>Name</th>
+                    {% if admin %}
+                    <th>BSB</th>
+                    <th>ACC</th>
+                    {% endif %}
                     <th>Claim</th>
                     <th>Uploaded</th>
                     <th>Receipt Date</th>
@@ -28,12 +32,23 @@
                 <tr class="summary-filter-row">
                     <th><input type="text" class="summary-filter-input" data-summary-filter="0" placeholder="Filter file"></th>
                     <th><input type="text" class="summary-filter-input" data-summary-filter="1" placeholder="Filter name"></th>
+                    {% if admin %}
+                    <th><input type="text" class="summary-filter-input" data-summary-filter="2" placeholder="Filter BSB"></th>
+                    <th><input type="text" class="summary-filter-input" data-summary-filter="3" placeholder="Filter ACC"></th>
+                    <th><input type="text" class="summary-filter-input" data-summary-filter="4" placeholder="Filter claim"></th>
+                    <th><input type="text" class="summary-filter-input" data-summary-filter="5" placeholder="Filter uploaded"></th>
+                    <th><input type="text" class="summary-filter-input" data-summary-filter="6" placeholder="Filter receipt"></th>
+                    <th><input type="text" class="summary-filter-input" data-summary-filter="7" placeholder="Filter value"></th>
+                    <th><input type="text" class="summary-filter-input" data-summary-filter="8" placeholder="Filter status"></th>
+                    <th><input type="text" class="summary-filter-input" data-summary-filter="9" placeholder="Filter details"></th>
+                    {% else %}
                     <th><input type="text" class="summary-filter-input" data-summary-filter="2" placeholder="Filter claim"></th>
                     <th><input type="text" class="summary-filter-input" data-summary-filter="3" placeholder="Filter uploaded"></th>
                     <th><input type="text" class="summary-filter-input" data-summary-filter="4" placeholder="Filter receipt"></th>
                     <th><input type="text" class="summary-filter-input" data-summary-filter="5" placeholder="Filter value"></th>
                     <th><input type="text" class="summary-filter-input" data-summary-filter="6" placeholder="Filter status"></th>
                     <th><input type="text" class="summary-filter-input" data-summary-filter="7" placeholder="Filter details"></th>
+                    {% endif %}
                 </tr>
             </thead>
             <tbody>
@@ -41,6 +56,10 @@
                 <tr>
                     <td>{{ row["original_filename"] }}</td>
                     <td>{{ row["full_name"] }}</td>
+                    {% if admin %}
+                    <td>{{ row["bsb"] or "-" }}</td>
+                    <td>{{ row["acc"] or "-" }}</td>
+                    {% endif %}
                     <td>{{ row["claim_details"] }}{% if row["misc_detail"] %} ({{ row["misc_detail"] }}){% endif %}</td>
                     <td>{{ row["uploaded_at"] | display_datetime }}</td>
                     <td>{{ row["receipt_date"] | display_date }}</td>

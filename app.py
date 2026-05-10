@@ -33,6 +33,7 @@ UPLOAD_DIR = STORAGE_ROOT / "uploads"
 DB_PATH = STORAGE_ROOT / "portal.db"
 METADATA_XLSX_PATH = STORAGE_ROOT / "metadata" / "upload_metadata.xlsx"
 SUMMARY_XLSX_PATH = STORAGE_ROOT / "metadata" / "upload_summary.xlsx"
+ADMIN_SUMMARY_XLSX_PATH = STORAGE_ROOT / "metadata" / "admin_upload_summary.xlsx"
 
 USER_PIN = "6882"
 ADMIN_OTP_SECRET = os.environ.get("ADMIN_OTP_SECRET", "").replace(" ", "").upper()
@@ -343,10 +344,10 @@ def export_metadata_spreadsheet() -> None:
         sheet.column_dimensions[column_cells[0].column_letter].width = min(length + 4, 42)
     workbook.save(METADATA_XLSX_PATH)
 
-    summary_workbook = Workbook()
-    summary_sheet = summary_workbook.active
-    summary_sheet.title = "Summary"
-    summary_headers = [
+    public_summary_workbook = Workbook()
+    public_summary_sheet = public_summary_workbook.active
+    public_summary_sheet.title = "Summary"
+    public_summary_headers = [
         "ID",
         "Created At",
         "Uploaded At",
@@ -362,9 +363,9 @@ def export_metadata_spreadsheet() -> None:
         "Stored Relative Path",
         "MIME Type",
     ]
-    summary_sheet.append(summary_headers)
+    public_summary_sheet.append(public_summary_headers)
     for row in rows:
-        summary_sheet.append(
+        public_summary_sheet.append(
             [
                 row["id"],
                 row["created_at"],
@@ -382,20 +383,76 @@ def export_metadata_spreadsheet() -> None:
                 row["mime_type"],
             ]
         )
-    for column_cells in summary_sheet.columns:
+    for column_cells in public_summary_sheet.columns:
         length = max(len(str(cell.value or "")) for cell in column_cells)
-        summary_sheet.column_dimensions[column_cells[0].column_letter].width = min(length + 4, 42)
-    summary_workbook.save(SUMMARY_XLSX_PATH)
+        public_summary_sheet.column_dimensions[column_cells[0].column_letter].width = min(length + 4, 42)
+    public_summary_workbook.save(SUMMARY_XLSX_PATH)
+
+    admin_summary_workbook = Workbook()
+    admin_summary_sheet = admin_summary_workbook.active
+    admin_summary_sheet.title = "Admin Summary"
+    admin_summary_headers = [
+        "ID",
+        "Created At",
+        "Uploaded At",
+        "Full Name",
+        "Receipt Date",
+        "Claim Details",
+        "Misc Detail",
+        "Additional Details",
+        "BSB",
+        "ACC",
+        "Value To Claim",
+        "Status",
+        "Original Filename",
+        "Stored Filename",
+        "Stored Relative Path",
+        "MIME Type",
+    ]
+    admin_summary_sheet.append(admin_summary_headers)
+    for row in rows:
+        admin_summary_sheet.append(
+            [
+                row["id"],
+                row["created_at"],
+                row["uploaded_at"],
+                row["full_name"],
+                row["receipt_date"],
+                row["claim_details"],
+                row["misc_detail"] or "",
+                row["additional_details"] or "",
+                row["bsb"] or "",
+                row["acc"] or "",
+                row["value_to_claim"] or "",
+                row["status"],
+                row["original_filename"],
+                row["stored_filename"],
+                row["stored_relative_path"],
+                row["mime_type"],
+            ]
+        )
+    for column_cells in admin_summary_sheet.columns:
+        length = max(len(str(cell.value or "")) for cell in column_cells)
+        admin_summary_sheet.column_dimensions[column_cells[0].column_letter].width = min(length + 4, 42)
+    admin_summary_workbook.save(ADMIN_SUMMARY_XLSX_PATH)
 
 
-def fetch_summary_rows() -> list[sqlite3.Row]:
+def fetch_summary_rows(admin: bool = False) -> list[sqlite3.Row]:
+    select_columns = """
+        id, uploaded_at, full_name, receipt_date, claim_details,
+        misc_detail, additional_details, value_to_claim, status,
+        original_filename
+    """
+    if admin:
+        select_columns = """
+            id, uploaded_at, full_name, receipt_date, claim_details,
+            misc_detail, additional_details, bsb, acc, value_to_claim, status,
+            original_filename
+        """
     with closing(get_db()) as connection:
         return connection.execute(
-            """
-            SELECT
-                id, uploaded_at, full_name, receipt_date, claim_details,
-                misc_detail, additional_details, value_to_claim, status,
-                original_filename
+            f"""
+            SELECT {select_columns}
             FROM uploads
             ORDER BY uploaded_at DESC, id DESC
             """
@@ -534,13 +591,14 @@ def upload_portal(request: Request, message: str | None = None) -> HTMLResponse:
 @app.get("/summary", response_class=HTMLResponse)
 def summary_page(request: Request, message: str | None = None) -> HTMLResponse:
     ensure_logged_in(request)
+    admin = request.session.get("role") == "admin"
     return templates.TemplateResponse(
         "summary.html",
         {
             "request": request,
             "message": message,
-            "rows": fetch_summary_rows(),
-            "admin": request.session.get("role") == "admin",
+            "rows": fetch_summary_rows(admin=admin),
+            "admin": admin,
         },
     )
 
@@ -548,12 +606,14 @@ def summary_page(request: Request, message: str | None = None) -> HTMLResponse:
 @app.get("/summary/download")
 def download_summary(request: Request) -> FileResponse:
     ensure_logged_in(request)
-    if not SUMMARY_XLSX_PATH.exists():
-        export_metadata_spreadsheet()
+    admin = request.session.get("role") == "admin"
+    export_metadata_spreadsheet()
+    path = ADMIN_SUMMARY_XLSX_PATH if admin else SUMMARY_XLSX_PATH
+    filename = "admin_upload_summary.xlsx" if admin else "upload_summary.xlsx"
     return FileResponse(
-        path=SUMMARY_XLSX_PATH,
+        path=path,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        filename="upload_summary.xlsx",
+        filename=filename,
     )
 
 
