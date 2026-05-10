@@ -229,13 +229,6 @@ fieldset {
     margin: 0 auto;
 }
 
-.hero-logo {
-    width: min(190px, 48vw);
-    height: auto;
-    margin: 0 auto 0.75rem;
-    filter: drop-shadow(0 16px 30px rgba(0, 0, 0, 0.28));
-}
-
 .hero-copy h1,
 .page-header h1 {
     font-size: clamp(2rem, 4vw, 3.4rem);
