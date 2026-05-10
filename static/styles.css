@@ -720,7 +720,8 @@ body.modal-open {
 
 .claim-grid {
     display: grid;
-    gap: 0.45rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.45rem 0.8rem;
 }
 
 .claim-grid label,
@@ -734,6 +735,10 @@ body.modal-open {
 .claim-grid input[type="checkbox"],
 .checkbox-inline input {
     width: auto;
+}
+
+.claim-grid input[type="text"] {
+    grid-column: 1 / -1;
 }
 
 .bank-grid {
@@ -820,6 +825,10 @@ body.modal-open {
     }
 
     .receipt-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .claim-grid {
         grid-template-columns: 1fr;
     }
 
