@@ -131,6 +131,24 @@ fieldset {
     letter-spacing: 0.03em;
 }
 
+
+.topbar-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+}
+
+.upload-pill {
+    background: #1f9f63;
+    border: 1px solid rgba(122, 226, 184, 0.45);
+    color: #fff;
+    box-shadow: var(--shadow);
+}
+
+.upload-pill:hover {
+    background: #26b06f;
+}
+
 .menu-wrap {
     position: relative;
 }
