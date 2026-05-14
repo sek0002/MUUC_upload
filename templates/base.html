@@ -21,14 +21,16 @@
             <a class="brand" href="{{ '/admin' if request.session.get('role') == 'admin' else '/dashboard' }}">
                 <span>MUUC Portal</span>
             </a>
-            <div class="menu-wrap">
+            <div class="topbar-actions">
+                <a class="button-link upload-pill" href="/upload">Upload</a>
+                <div class="menu-wrap">
                 <button class="menu-button" type="button" aria-expanded="false">Menu</button>
                 <div class="menu-panel">
                     <a href="{{ '/admin' if request.session.get('role') == 'admin' else '/dashboard' }}">Main Page</a>
-                    <a href="/upload">Upload Portal</a>
                     <a href="/summary">Summary Page</a>
                     <a href="/logout">Log Out</a>
                 </div>
+            </div>
             </div>
         </header>
         {% endif %}
