@@ -108,6 +108,7 @@ def init_db() -> None:
                 acc TEXT,
                 value_to_claim TEXT,
                 status TEXT NOT NULL DEFAULT 'pending',
+                status_updated_at TEXT,
                 original_filename TEXT NOT NULL,
                 stored_filename TEXT NOT NULL,
                 stored_relative_path TEXT NOT NULL DEFAULT '',
@@ -130,6 +131,11 @@ def init_db() -> None:
             connection.execute("ALTER TABLE uploads ADD COLUMN stored_relative_path TEXT NOT NULL DEFAULT ''")
             connection.execute(
                 "UPDATE uploads SET stored_relative_path = stored_filename WHERE stored_relative_path = ''"
+            )
+        if "status_updated_at" not in existing_columns:
+            connection.execute("ALTER TABLE uploads ADD COLUMN status_updated_at TEXT")
+            connection.execute(
+                "UPDATE uploads SET status_updated_at = uploaded_at WHERE status IN ('processed', 'rejected')"
             )
         connection.commit()
     export_metadata_spreadsheet()
@@ -176,6 +182,10 @@ def normalize_status(value: str | None) -> str:
 
 def status_to_processed(status: str) -> int:
     return 1 if status == "processed" else 0
+
+
+def status_updated_timestamp(status: str) -> str | None:
+    return now_iso() if status in {"processed", "rejected"} else None
 
 
 def generate_totp(secret: str, interval: int | None = None) -> str:
@@ -305,6 +315,7 @@ def fetch_uploads(
             "additional_details",
             "value_to_claim",
             "status",
+            "status_updated_at",
         ]
         if admin:
             search_columns.extend(["bsb", "acc"])
@@ -316,13 +327,13 @@ def fetch_uploads(
     where_clause = f"WHERE {' AND '.join(where_parts)}" if where_parts else ""
     select_columns = """
         id, created_at, uploaded_at, full_name, receipt_date, claim_details,
-        misc_detail, additional_details, value_to_claim, status,
+        misc_detail, additional_details, value_to_claim, status, status_updated_at,
         original_filename, stored_filename, stored_relative_path, mime_type, processed
     """
     if admin:
         select_columns = """
             id, created_at, uploaded_at, full_name, receipt_date, claim_details,
-            misc_detail, additional_details, bsb, acc, value_to_claim, status,
+            misc_detail, additional_details, bsb, acc, value_to_claim, status, status_updated_at,
             original_filename, stored_filename, stored_relative_path, mime_type, processed
         """
     with closing(get_db()) as connection:
@@ -364,7 +375,7 @@ def export_metadata_spreadsheet() -> None:
             """
             SELECT
                 id, created_at, uploaded_at, full_name, receipt_date, claim_details,
-                misc_detail, additional_details, bsb, acc, value_to_claim, status,
+                misc_detail, additional_details, bsb, acc, value_to_claim, status, status_updated_at,
                 original_filename, stored_filename, stored_relative_path, mime_type, processed
             FROM uploads
             ORDER BY uploaded_at DESC, id DESC
@@ -387,6 +398,7 @@ def export_metadata_spreadsheet() -> None:
         "ACC",
         "Value To Claim",
         "Status",
+        "Status Updated At",
         "Original Filename",
         "Stored Filename",
         "Stored Relative Path",
@@ -409,6 +421,7 @@ def export_metadata_spreadsheet() -> None:
                 row["acc"] or "",
                 row["value_to_claim"] or "",
                 row["status"],
+                row["status_updated_at"] or "",
                 row["original_filename"],
                 row["stored_filename"],
                 row["stored_relative_path"],
@@ -435,6 +448,7 @@ def export_metadata_spreadsheet() -> None:
         "Additional Details",
         "Value To Claim",
         "Status",
+        "Status Updated At",
         "Original Filename",
         "Stored Filename",
         "Stored Relative Path",
@@ -454,6 +468,7 @@ def export_metadata_spreadsheet() -> None:
                 row["additional_details"] or "",
                 row["value_to_claim"] or "",
                 row["status"],
+                row["status_updated_at"] or "",
                 row["original_filename"],
                 row["stored_filename"],
                 row["stored_relative_path"],
@@ -481,6 +496,7 @@ def export_metadata_spreadsheet() -> None:
         "ACC",
         "Value To Claim",
         "Status",
+        "Status Updated At",
         "Original Filename",
         "Stored Filename",
         "Stored Relative Path",
@@ -502,6 +518,7 @@ def export_metadata_spreadsheet() -> None:
                 row["acc"] or "",
                 row["value_to_claim"] or "",
                 row["status"],
+                row["status_updated_at"] or "",
                 row["original_filename"],
                 row["stored_filename"],
                 row["stored_relative_path"],
@@ -517,13 +534,13 @@ def export_metadata_spreadsheet() -> None:
 def fetch_summary_rows(admin: bool = False) -> list[sqlite3.Row]:
     select_columns = """
         id, uploaded_at, full_name, receipt_date, claim_details,
-        misc_detail, additional_details, value_to_claim, status,
+        misc_detail, additional_details, value_to_claim, status, status_updated_at,
         original_filename
     """
     if admin:
         select_columns = """
             id, uploaded_at, full_name, receipt_date, claim_details,
-            misc_detail, additional_details, bsb, acc, value_to_claim, status,
+            misc_detail, additional_details, bsb, acc, value_to_claim, status, status_updated_at,
             original_filename
         """
     with closing(get_db()) as connection:
@@ -556,9 +573,9 @@ def insert_receipt(receipt: dict[str, Any], files: list[UploadFile]) -> None:
                 """
                 INSERT INTO uploads (
                     created_at, uploaded_at, full_name, receipt_date, claim_details,
-                    misc_detail, additional_details, bsb, acc, value_to_claim, status,
+                    misc_detail, additional_details, bsb, acc, value_to_claim, status, status_updated_at,
                     original_filename, stored_filename, stored_relative_path, mime_type, processed
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     timestamp,
@@ -572,6 +589,7 @@ def insert_receipt(receipt: dict[str, Any], files: list[UploadFile]) -> None:
                     (receipt.get("acc") or "").strip(),
                     value_to_claim,
                     status,
+                    status_updated_timestamp(status),
                     upload_file.filename,
                     stored_filename,
                     stored_relative_path,
@@ -762,8 +780,13 @@ def set_status(request: Request, upload_id: int, status: str = Form(...)) -> Red
     normalized_status = normalize_status(status)
     with closing(get_db()) as connection:
         connection.execute(
-            "UPDATE uploads SET status = ?, processed = ? WHERE id = ?",
-            (normalized_status, status_to_processed(normalized_status), upload_id),
+            "UPDATE uploads SET status = ?, status_updated_at = ?, processed = ? WHERE id = ?",
+            (
+                normalized_status,
+                status_updated_timestamp(normalized_status),
+                status_to_processed(normalized_status),
+                upload_id,
+            ),
         )
         connection.commit()
     export_metadata_spreadsheet()
@@ -794,6 +817,13 @@ def update_upload(
     new_full_name = full_name.strip()
     normalized_value_to_claim = normalize_claim_value(value_to_claim)
     normalized_status = normalize_status(status)
+    status_updated_at = (
+        status_updated_timestamp(normalized_status)
+        if upload["status"] != normalized_status
+        else upload["status_updated_at"]
+    )
+    if normalized_status == "pending":
+        status_updated_at = None
     stored_filename, stored_relative_path = relocate_upload_if_needed(upload, new_full_name)
     with closing(get_db()) as connection:
         connection.execute(
@@ -801,7 +831,7 @@ def update_upload(
             UPDATE uploads
             SET receipt_date = ?, full_name = ?, claim_details = ?, misc_detail = ?,
                 additional_details = ?, bsb = ?, acc = ?, value_to_claim = ?,
-                stored_filename = ?, stored_relative_path = ?, status = ?, processed = ?
+                stored_filename = ?, stored_relative_path = ?, status = ?, status_updated_at = ?, processed = ?
             WHERE id = ?
             """,
             (
@@ -816,6 +846,7 @@ def update_upload(
                 stored_filename,
                 stored_relative_path,
                 normalized_status,
+                status_updated_at,
                 status_to_processed(normalized_status),
                 upload_id,
             ),
@@ -860,9 +891,9 @@ def duplicate_upload(request: Request, upload_id: int) -> RedirectResponse:
             """
             INSERT INTO uploads (
                 created_at, uploaded_at, full_name, receipt_date, claim_details,
-                misc_detail, additional_details, bsb, acc, value_to_claim, status,
+                misc_detail, additional_details, bsb, acc, value_to_claim, status, status_updated_at,
                 original_filename, stored_filename, stored_relative_path, mime_type, processed
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 timestamp,
@@ -876,6 +907,7 @@ def duplicate_upload(request: Request, upload_id: int) -> RedirectResponse:
                 upload["acc"],
                 upload["value_to_claim"],
                 "pending",
+                status_updated_timestamp("pending"),
                 upload["original_filename"],
                 new_stored_filename,
                 stored_relative_path,

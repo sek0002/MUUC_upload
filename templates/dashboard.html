@@ -39,6 +39,12 @@
                             <p class="upload-title">{{ upload["original_filename"] }}</p>
                             <p class="upload-subtitle">{{ upload["full_name"] }}</p>
                             {% if admin %}
+                            <p class="upload-subtitle admin-line-detail">
+                                Reason: {{ upload["claim_details"] }}{% if upload["misc_detail"] %} ({{ upload["misc_detail"] }}){% endif %}
+                                · Value: {{ upload["value_to_claim"] or "-" }}
+                            </p>
+                            {% endif %}
+                            {% if admin %}
                             <div class="hover-preview summary-hover-preview">
                                 <p class="preview-label">Preview</p>
                                 {% if upload["mime_type"].startswith("image/") %}
@@ -109,6 +115,9 @@
                             {% endif %}
                             {% if upload["additional_details"] %}
                             <p><strong>Additional details:</strong> {{ upload["additional_details"] }}</p>
+                            {% endif %}
+                            {% if upload["status_updated_at"] %}
+                            <p><strong>Status updated:</strong> {{ upload["status_updated_at"] | display_datetime }}</p>
                             {% endif %}
                             {% if admin and (upload["bsb"] or upload["acc"]) %}
                             <p><strong>Bank details:</strong> BSB {{ upload["bsb"] or "-" }} / ACC {{ upload["acc"] or "-" }}</p>

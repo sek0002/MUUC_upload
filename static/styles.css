@@ -404,6 +404,16 @@ fieldset {
     white-space: nowrap;
 }
 
+.admin-line-detail {
+    font-size: 0.78rem;
+    color: var(--accent-strong);
+}
+
+.admin-date-group-card .upload-summary {
+    padding-right: 10.8rem;
+    min-height: 4.65rem;
+}
+
 .upload-details {
     display: grid;
     grid-template-columns: minmax(0, 1.15fr) minmax(260px, 0.85fr);
@@ -430,10 +440,6 @@ fieldset {
     align-items: center;
     justify-content: flex-end;
     min-width: max-content;
-}
-
-.admin-date-group-card .upload-summary {
-    padding-right: 10.8rem;
 }
 
 .status-shortcuts {
@@ -933,6 +939,7 @@ body.modal-open {
 
     .admin-date-group-card .upload-summary {
         padding-right: 8.2rem;
+        min-height: 4.15rem;
     }
 
     .processed-badge {

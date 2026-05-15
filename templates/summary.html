@@ -27,6 +27,7 @@
                     <th>Receipt Date</th>
                     <th>Value</th>
                     <th>Status</th>
+                    <th>Status Updated</th>
                     <th>Details</th>
                 </tr>
                 <tr class="summary-filter-row">
@@ -40,14 +41,16 @@
                     <th><input type="text" class="summary-filter-input" data-summary-filter="6" placeholder="Filter receipt"></th>
                     <th><input type="text" class="summary-filter-input" data-summary-filter="7" placeholder="Filter value"></th>
                     <th><input type="text" class="summary-filter-input" data-summary-filter="8" placeholder="Filter status"></th>
-                    <th><input type="text" class="summary-filter-input" data-summary-filter="9" placeholder="Filter details"></th>
+                    <th><input type="text" class="summary-filter-input" data-summary-filter="9" placeholder="Filter updated"></th>
+                    <th><input type="text" class="summary-filter-input" data-summary-filter="10" placeholder="Filter details"></th>
                     {% else %}
                     <th><input type="text" class="summary-filter-input" data-summary-filter="2" placeholder="Filter claim"></th>
                     <th><input type="text" class="summary-filter-input" data-summary-filter="3" placeholder="Filter uploaded"></th>
                     <th><input type="text" class="summary-filter-input" data-summary-filter="4" placeholder="Filter receipt"></th>
                     <th><input type="text" class="summary-filter-input" data-summary-filter="5" placeholder="Filter value"></th>
                     <th><input type="text" class="summary-filter-input" data-summary-filter="6" placeholder="Filter status"></th>
-                    <th><input type="text" class="summary-filter-input" data-summary-filter="7" placeholder="Filter details"></th>
+                    <th><input type="text" class="summary-filter-input" data-summary-filter="7" placeholder="Filter updated"></th>
+                    <th><input type="text" class="summary-filter-input" data-summary-filter="8" placeholder="Filter details"></th>
                     {% endif %}
                 </tr>
             </thead>
@@ -65,6 +68,7 @@
                     <td>{{ row["receipt_date"] | display_date }}</td>
                     <td>{{ row["value_to_claim"] or "-" }}</td>
                     <td>{{ row["status"] | title }}</td>
+                    <td>{{ row["status_updated_at"] | display_datetime if row["status_updated_at"] else "-" }}</td>
                     <td>{{ row["additional_details"] or "-" }}</td>
                 </tr>
                 {% endfor %}
