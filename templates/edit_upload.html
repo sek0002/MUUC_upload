@@ -29,6 +29,7 @@
             <label><input type="checkbox" name="claim_details" value="Gear servicing" {% if "Gear servicing" in claims %}checked{% endif %}> Gear servicing</label>
             <label><input type="checkbox" name="claim_details" value="Car/Boat servicing" {% if "Car/Boat servicing" in claims %}checked{% endif %}> Car/Boat servicing</label>
             <label><input type="checkbox" name="claim_details" value="Refund" {% if "Refund" in claims %}checked{% endif %}> Refund</label>
+            <label><input type="checkbox" name="claim_details" value="Gear deposit refund" {% if "Gear deposit refund" in claims %}checked{% endif %}> Gear deposit refund</label>
             <label><input type="checkbox" name="claim_details" value="Special Trips" {% if "Special Trips" in claims %}checked{% endif %}> Special Trips</label>
             <label><input type="checkbox" name="claim_details" value="Courses" {% if "Courses" in claims %}checked{% endif %}> Courses</label>
             <label><input type="checkbox" name="claim_details" value="Compressor" {% if "Compressor" in claims %}checked{% endif %}> Compressor</label>
@@ -52,7 +53,7 @@
         </div>
 
         <label>Value to claim</label>
-        <input type="number" name="value_to_claim" value="{{ upload['value_to_claim'] or '' }}" inputmode="decimal" step="0.01" min="0">
+        <input type="text" name="value_to_claim" value="{{ upload['value_to_claim'] or '' }}" inputmode="decimal" pattern="^[0-9]*[.,]?[0-9]{0,2}$" autocomplete="off">
 
         <label>Status</label>
         <select name="status">
