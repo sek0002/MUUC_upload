@@ -44,6 +44,7 @@
                     <label><input type="checkbox" value="Gear servicing" data-claim> Gear servicing</label>
                     <label><input type="checkbox" value="Car/Boat servicing" data-claim> Car/Boat servicing</label>
                     <label><input type="checkbox" value="Refund" data-claim> Refund</label>
+                    <label><input type="checkbox" value="Gear deposit refund" data-claim> Gear deposit refund</label>
                     <label><input type="checkbox" value="Special Trips" data-claim> Special Trips</label>
                     <label><input type="checkbox" value="Courses" data-claim> Courses</label>
                     <label><input type="checkbox" value="Compressor" data-claim> Compressor</label>
@@ -67,7 +68,7 @@
                 </div>
 
                 <label>Value to claim</label>
-                <input type="number" data-field="value_to_claim" inputmode="decimal" step="0.01" min="0" placeholder="Enter amount">
+                <input type="text" data-field="value_to_claim" inputmode="decimal" pattern="^[0-9]*[.,]?[0-9]{0,2}$" autocomplete="off" placeholder="Enter amount">
             </div>
 
             <aside class="receipt-preview-column">
