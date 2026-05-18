@@ -9,10 +9,10 @@
     <meta name="apple-mobile-web-app-title" content="MUUC Portal">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>{% block title %}MUUC Upload Portal{% endblock %}</title>
-    <link rel="manifest" href="{{ url_for('static', path='/manifest.webmanifest') }}?v={{ asset_version() }}">
-    <link rel="icon" type="image/png" href="{{ url_for('static', path='/logo-circle.png') }}">
-    <link rel="apple-touch-icon" href="{{ url_for('static', path='/logo-circle.png') }}">
-    <link rel="stylesheet" href="{{ url_for('static', path='/styles.css') }}?v={{ asset_version() }}">
+    <link rel="manifest" href="/static/manifest.webmanifest?v={{ asset_version() }}">
+    <link rel="icon" type="image/png" href="/static/logo-circle.png">
+    <link rel="apple-touch-icon" href="/static/logo-circle.png">
+    <link rel="stylesheet" href="/static/styles.css?v={{ asset_version() }}">
 </head>
 <body>
     <div class="site-shell">
@@ -53,6 +53,6 @@
             <div class="zoom-stage" data-zoom-stage></div>
         </div>
     </div>
-    <script src="{{ url_for('static', path='/app.js') }}?v={{ asset_version() }}"></script>
+    <script src="/static/app.js?v={{ asset_version() }}"></script>
 </body>
 </html>
