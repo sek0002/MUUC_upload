@@ -275,6 +275,12 @@ fieldset {
     gap: 0.5rem;
 }
 
+.login-home-link {
+    display: block;
+    margin-top: 0.6rem;
+    text-align: center;
+}
+
 .login-hint {
     display: grid;
     gap: 1rem;
