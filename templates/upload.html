@@ -12,6 +12,7 @@
 <form id="upload-form" action="/upload" method="post" enctype="multipart/form-data" class="upload-form">
     <input type="hidden" name="receipts_payload" id="receipts_payload">
     <div id="receipt-sections"></div>
+    <p class="form-hint">You can add multiple receipt forms and upload multiple files in each form.</p>
     <div class="form-actions">
         <button type="button" class="secondary" id="add-receipt-button">Add Another Receipt</button>
         <button type="submit">Upload</button>
@@ -29,7 +30,7 @@
                 <label>Date</label>
                 <input type="datetime-local" data-field="receipt_date" value="{{ current_datetime }}" required>
 
-                <label>Upload PDF or image files</label>
+                <label>Upload one or more PDF/image files</label>
                 <input type="file" data-field="files" accept=".pdf,image/*" multiple required>
 
                 <label>Full Name</label>
