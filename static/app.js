@@ -315,23 +315,6 @@ if (uploadForm) {
       redirect: "follow"
     });
 
-    if (!response.ok) {
-      let message = "Upload failed. Please check the selected files and try again.";
-      try {
-        const body = await response.json();
-        if (body.detail) {
-          message = body.detail;
-        }
-      } catch (_error) {
-        const text = await response.text();
-        if (text.trim()) {
-          message = text.trim();
-        }
-      }
-      window.alert(message);
-      return;
-    }
-
     window.location.href = response.url;
   });
 }

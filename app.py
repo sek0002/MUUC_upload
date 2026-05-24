@@ -37,7 +37,7 @@ ADMIN_SUMMARY_XLSX_PATH = STORAGE_ROOT / "metadata" / "admin_upload_summary.xlsx
 
 USER_PIN = os.environ.get("USER_PIN", "").strip()
 ADMIN_OTP_SECRET = os.environ.get("ADMIN_OTP_SECRET", "").replace(" ", "").upper()
-ALLOWED_EXTENSIONS = {".pdf", ".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp", ".tiff", ".heic", ".heif"}
+ALLOWED_EXTENSIONS = {".pdf", ".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp", ".tiff"}
 LOGIN_RATE_LIMIT_ATTEMPTS = int(os.environ.get("LOGIN_RATE_LIMIT_ATTEMPTS", "5"))
 LOGIN_RATE_LIMIT_WINDOW_SECONDS = int(os.environ.get("LOGIN_RATE_LIMIT_WINDOW_SECONDS", "600"))
 LOGIN_LOCKOUT_SECONDS = int(os.environ.get("LOGIN_LOCKOUT_SECONDS", "900"))
