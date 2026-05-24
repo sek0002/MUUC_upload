@@ -9,6 +9,7 @@ import os
 import secrets
 import sqlite3
 import struct
+import tempfile
 import time
 from contextlib import closing
 from datetime import datetime
@@ -34,10 +35,11 @@ DB_PATH = STORAGE_ROOT / "portal.db"
 METADATA_XLSX_PATH = STORAGE_ROOT / "metadata" / "upload_metadata.xlsx"
 SUMMARY_XLSX_PATH = STORAGE_ROOT / "metadata" / "upload_summary.xlsx"
 ADMIN_SUMMARY_XLSX_PATH = STORAGE_ROOT / "metadata" / "admin_upload_summary.xlsx"
+TEMP_DIR = STORAGE_ROOT / "tmp"
 
 USER_PIN = os.environ.get("USER_PIN", "").strip()
 ADMIN_OTP_SECRET = os.environ.get("ADMIN_OTP_SECRET", "").replace(" ", "").upper()
-ALLOWED_EXTENSIONS = {".pdf", ".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp", ".tiff"}
+ALLOWED_EXTENSIONS = {".pdf", ".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp", ".tiff", ".heic", ".heif"}
 LOGIN_RATE_LIMIT_ATTEMPTS = int(os.environ.get("LOGIN_RATE_LIMIT_ATTEMPTS", "5"))
 LOGIN_RATE_LIMIT_WINDOW_SECONDS = int(os.environ.get("LOGIN_RATE_LIMIT_WINDOW_SECONDS", "600"))
 LOGIN_LOCKOUT_SECONDS = int(os.environ.get("LOGIN_LOCKOUT_SECONDS", "900"))
@@ -90,6 +92,7 @@ def get_db() -> sqlite3.Connection:
 
 
 def init_db() -> None:
+    configure_temp_dir()
     UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
     METADATA_XLSX_PATH.parent.mkdir(parents=True, exist_ok=True)
     with closing(get_db()) as connection:
@@ -139,6 +142,12 @@ def init_db() -> None:
             )
         connection.commit()
     export_metadata_spreadsheet()
+
+
+def configure_temp_dir() -> None:
+    TEMP_DIR.mkdir(parents=True, exist_ok=True)
+    os.environ["TMPDIR"] = str(TEMP_DIR)
+    tempfile.tempdir = str(TEMP_DIR)
 
 
 @app.on_event("startup")
